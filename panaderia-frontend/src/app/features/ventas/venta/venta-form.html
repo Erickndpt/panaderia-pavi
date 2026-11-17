@@ -1,0 +1,255 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">Nueva venta</h2>
+      <p class="pagina__descripcion">
+        Registra la venta seleccionando un cliente activo, el tipo de venta y una o más líneas de
+        producto. El precio vigente, los subtotales y el total los confirma el servidor al registrar.
+      </p>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  @if (catalogosError(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+      <button mat-stroked-button color="primary" type="button" (click)="cargarCatalogos()">
+        <mat-icon class="mat-icono-fila">refresh</mat-icon>
+        Reintentar carga de catálogos
+      </button>
+    </div>
+  }
+
+  <form class="formulario-tarjeta venta-tarjeta" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <mat-form-field appearance="outline" class="formulario-campo">
+      <mat-label>Cliente</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="clienteTexto"
+        [matAutocomplete]="autoCliente"
+        (input)="actualizarTextoCliente($any($event.target).value)"
+        placeholder="Busque por nombre, razón social o documento"
+        autocomplete="off"
+      />
+      <mat-hint>Solo se muestran clientes activos.</mat-hint>
+      @if (form.controls.clienteTexto.touched && form.controls.clienteTexto.hasError('required')) {
+        <mat-error>El cliente es obligatorio</mat-error>
+      }
+      @if (
+        form.controls.clienteTexto.touched && form.controls.clienteTexto.hasError('clienteInvalido')
+      ) {
+        <mat-error>Seleccione un cliente activo de la lista</mat-error>
+      }
+      @if (form.controls.clienteId.touched && form.controls.clienteId.hasError('required')) {
+        <mat-error>Debe seleccionar un cliente de la lista</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-autocomplete #autoCliente="matAutocomplete" (optionSelected)="alSeleccionarCliente($event.option.value)">
+      @for (cliente of clientesFiltrados(); track cliente.id) {
+        <mat-option [value]="cliente">
+          <span class="opcion-titulo">{{ cliente.nombreRazonSocial }}</span>
+          <span class="opcion-detalle">
+            {{ cliente.tipoDocumento }} {{ cliente.numeroDocumento ?? '' }} · Activo
+          </span>
+        </mat-option>
+      }
+      @if (clientesFiltrados().length === 0) {
+        <mat-option disabled>Sin clientes activos que coincidan</mat-option>
+      }
+    </mat-autocomplete>
+
+    <div class="formulario-rejilla">
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Tipo de venta</mat-label>
+        <mat-select [value]="form.controls.tipo.value" (selectionChange)="actualizarTipo($event.value)">
+          <mat-option value="LOCAL">Local</mat-option>
+          <mat-option value="EXPORTACION">Exportación</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      @if (esExportacion()) {
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>País de destino</mat-label>
+          <input matInput type="text" maxlength="80" formControlName="paisDestino" placeholder="Ej. Chile" />
+          @if (form.controls.paisDestino.touched && form.controls.paisDestino.hasError('requerido')) {
+            <mat-error>El país de destino es obligatorio para exportación</mat-error>
+          }
+          @if (form.controls.paisDestino.touched && form.controls.paisDestino.hasError('maxlength')) {
+            <mat-error>Máximo 80 caracteres</mat-error>
+          }
+        </mat-form-field>
+      }
+    </div>
+
+    @if (catalogosLoading()) {
+      <div class="formulario-cargando">
+        <mat-spinner diameter="32" />
+        <p>Cargando catálogos de clientes, productos y existencias...</p>
+      </div>
+    }
+
+    <h3 class="venta-subtitulo">Detalle de la venta</h3>
+
+    <div class="detalle-lineas" formArrayName="detalles">
+      @for (linea of lineas(); track $index; let i = $index) {
+        <div class="linea" [formGroupName]="i">
+          <div class="linea__encabezado">
+            <span class="linea__numero">Línea {{ i + 1 }}</span>
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              aria-label="Quitar línea"
+              [disabled]="!puedeQuitarLinea"
+              (click)="quitarLinea(i)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <mat-form-field appearance="outline" class="formulario-campo">
+            <mat-label>Producto</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="productoTexto"
+              [matAutocomplete]="autoProducto"
+              (input)="actualizarTextoProducto(i, $any($event.target).value)"
+              placeholder="Busque un producto"
+              autocomplete="off"
+            />
+            @if (linea.producto; as producto) {
+              <mat-hint>
+                {{ producto.categoria.nombre }} · Precio {{ formatearMoneda(linea.precio) }} ·
+                @switch (linea.estadoExistencia) {
+                  @case ('cargando') {
+                    Consultando existencia...
+                  }
+                  @case ('disponible') {
+                    Existencia {{ linea.existencia }}
+                  }
+                  @case ('error') {
+                    Existencia no disponible
+                  }
+                  @case ('sinExistencia') {
+                    Sin existencia registrada
+                  }
+                  @default {
+                    Existencia no disponible
+                  }
+                }
+              </mat-hint>
+            }
+            @if (form.controls.detalles.at(i).get('productoTexto')!.touched &&
+              form.controls.detalles.at(i).get('productoTexto')!.hasError('required')) {
+              <mat-error>El producto es obligatorio</mat-error>
+            }
+            @if (form.controls.detalles.at(i).get('productoTexto')!.touched &&
+              form.controls.detalles.at(i).get('productoTexto')!.hasError('productoInvalido')) {
+              <mat-error>Seleccione un producto de la lista</mat-error>
+            }
+            @if (form.controls.detalles.at(i).get('productoId')!.touched &&
+              form.controls.detalles.at(i).get('productoId')!.hasError('required')) {
+              <mat-error>Debe seleccionar un producto de la lista</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-autocomplete
+            #autoProducto="matAutocomplete"
+            (optionSelected)="alSeleccionarProducto(i, $event.option.value)"
+          >
+            @for (producto of productosFiltrados()[i]; track producto.id) {
+              <mat-option [value]="producto">
+                <span class="opcion-titulo">{{ producto.nombre }}</span>
+                <span class="opcion-detalle">
+                  {{ producto.categoria.nombre }} · {{ formatearMoneda(producto.precio) }}
+                </span>
+              </mat-option>
+            }
+            @if (productosFiltrados()[i].length === 0) {
+              <mat-option disabled>Sin productos que coincidan</mat-option>
+            }
+          </mat-autocomplete>
+
+          <mat-form-field appearance="outline" class="formulario-campo">
+            <mat-label>Cantidad</mat-label>
+            <input matInput type="number" step="1" min="1" formControlName="cantidad" />
+            @if (form.controls.detalles.at(i).get('cantidad')!.touched &&
+              form.controls.detalles.at(i).get('cantidad')!.hasError('required')) {
+              <mat-error>La cantidad es obligatoria</mat-error>
+            }
+            @if (form.controls.detalles.at(i).get('cantidad')!.touched &&
+              form.controls.detalles.at(i).get('cantidad')!.hasError('entero')) {
+              <mat-error>La cantidad debe ser un número entero</mat-error>
+            }
+            @if (form.controls.detalles.at(i).get('cantidad')!.touched &&
+              form.controls.detalles.at(i).get('cantidad')!.hasError('positivo')) {
+              <mat-error>La cantidad debe ser mayor que cero</mat-error>
+            }
+          </mat-form-field>
+
+          @if (linea.estadoExistencia === 'error' || linea.estadoExistencia === 'sinExistencia') {
+            <button
+              mat-stroked-button
+              color="primary"
+              type="button"
+              class="linea__reintentar"
+              (click)="reintentarExistencia(i)"
+            >
+              <mat-icon class="mat-icono-fila">refresh</mat-icon>
+              Reintentar carga
+            </button>
+          }
+
+          @if (linea.excedeStock && linea.existencia !== null) {
+            <p class="linea__advertencia" role="alert">
+              <mat-icon class="mat-icono-fila">warning</mat-icon>
+              La cantidad solicitada supera la existencia disponible ({{ linea.existencia }}).
+            </p>
+          }
+
+          <p class="linea__subtotal">
+            Subtotal estimado: <strong>{{ formatearMoneda(linea.subtotal) }}</strong>
+          </p>
+        </div>
+      }
+    </div>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      class="venta-agregar"
+      (click)="agregarLinea()"
+    >
+      <mat-icon class="mat-icono-fila">add</mat-icon>
+      Agregar línea
+    </button>
+
+    <div class="venta-total">
+      <span class="venta-total__etiqueta">
+        Suma estimado ({{ lineas().length }} línea{{ lineas().length === 1 ? '' : 's' }})
+      </span>
+      <span class="venta-total__valor">{{ formatearMoneda(totalEstimado()) }}</span>
+    </div>
+
+    <div class="formulario-acciones">
+      <a mat-stroked-button routerLink="/ventas/reporte">Cancelar</a>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="!puedeRegistrar()"
+      >
+        {{ saving() ? 'Registrando...' : 'Registrar venta' }}
+      </button>
+    </div>
+  </form>
+</section>

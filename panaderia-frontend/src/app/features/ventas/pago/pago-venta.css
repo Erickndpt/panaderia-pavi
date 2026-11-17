@@ -1,0 +1,146 @@
+:host {
+  display: block;
+}
+
+.filtros__cargando {
+  display: flex;
+  align-items: center;
+  padding-top: 0.9rem;
+}
+
+.opcion-titulo {
+  font-weight: 600;
+}
+
+.opcion-detalle {
+  margin-left: 0.5rem;
+  color: #8a7458;
+  font-size: 0.85rem;
+}
+
+.venta-seleccionada {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.75rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.15rem;
+  background-color: #fffaf0;
+  border: 1px solid #e4d5bb;
+  border-top: 4px solid #c9a227;
+  border-radius: 10px;
+}
+
+.venta-seleccionada__dato {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.venta-seleccionada__etiqueta {
+  color: #8a7458;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.venta-seleccionada__valor {
+  color: #3b2416;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pago-indicadores {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  background-color: #fffaf0;
+  border: 1px solid #e4d5bb;
+  border-top: 4px solid #c9a227;
+  border-radius: 10px;
+}
+
+.indicador__etiqueta {
+  color: #8a7458;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.indicador__valor {
+  color: #3b2416;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador__valor--moneda {
+  font-size: 1.2rem;
+}
+
+.chip-estado-pago {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.chip-estado-pago--pendiente {
+  background-color: #ece3d4;
+  color: #8a7458;
+  border: 1px solid #d8c8a8;
+}
+
+.chip-estado-pago--parcial {
+  background-color: #fdf0d5;
+  color: #8a6d1d;
+  border: 1px solid #e8d191;
+}
+
+.chip-estado-pago--pagado {
+  background-color: #e2f0e4;
+  color: #2f6b3f;
+  border: 1px solid #b9d9bf;
+}
+
+.pago-formulario {
+  margin-top: 1.5rem;
+}
+
+.pago-formulario__titulo {
+  margin: 0 0 1rem;
+  color: #3b2416;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.pago-formulario__nota {
+  margin: -0.5rem 0 0;
+  color: #8c2f27;
+  font-size: 0.9rem;
+}
+
+@media (width <= 860px) {
+  .pago-indicadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 640px) {
+  .pago-indicadores {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,118 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">{{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}</h2>
+      <p class="pagina__descripcion">
+        {{
+          esEdicion
+            ? 'Modifica el nombre, el precio o la categoría del producto seleccionado.'
+            : 'Registra un nuevo producto con su precio y categoría.'
+        }}
+      </p>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  @if (categoriasError(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  <form class="formulario-tarjeta" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    @if (loading()) {
+      <div class="formulario-cargando">
+        <mat-spinner diameter="36" />
+        <p>Cargando producto...</p>
+      </div>
+    } @else {
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Nombre</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="nombre"
+          maxlength="120"
+          autocomplete="off"
+          placeholder="Ej. Croissant de mantequilla"
+        />
+        @if (form.controls.nombre.touched && form.controls.nombre.hasError('required')) {
+          <mat-error>El nombre es obligatorio</mat-error>
+        }
+        @if (form.controls.nombre.touched && form.controls.nombre.hasError('maxlength')) {
+          <mat-error>Máximo 120 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Precio (S/)</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="precio"
+          min="0"
+          step="0.01"
+          inputmode="decimal"
+          placeholder="0.00"
+        />
+        @if (form.controls.precio.touched && form.controls.precio.hasError('required')) {
+          <mat-error>El precio es obligatorio</mat-error>
+        }
+        @if (form.controls.precio.touched && form.controls.precio.hasError('min')) {
+          <mat-error>El precio no puede ser negativo</mat-error>
+        }
+        @if (form.controls.precio.touched && form.controls.precio.hasError('decimales')) {
+          <mat-error>Máximo dos decimales</mat-error>
+        }
+        @if (form.controls.precio.touched && form.controls.precio.hasError('entero')) {
+          <mat-error>El precio excede el máximo permitido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Categoría</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="categoriaTexto"
+          [matAutocomplete]="autoCategoria"
+          autocomplete="off"
+          placeholder="Escriba para buscar una categoría"
+          (input)="actualizarTexto($any($event.target).value)"
+        />
+        @if (categoriasLoading()) {
+          <mat-spinner matSuffix diameter="20" />
+        }
+        @if (form.controls.categoriaTexto.touched && form.controls.categoriaTexto.hasError('required')) {
+          <mat-error>Debe seleccionar una categoría</mat-error>
+        }
+        @if (form.controls.categoriaTexto.touched && form.controls.categoriaTexto.hasError('categoriaInvalida')) {
+          <mat-error>Seleccione una categoría de la lista</mat-error>
+        }
+
+        <mat-autocomplete
+          #autoCategoria="matAutocomplete"
+          (optionSelected)="alSeleccionarCategoria($event.option.value)"
+        >
+          @for (categoria of categoriasFiltradas(); track categoria.id) {
+            <mat-option [value]="categoria.nombre">{{ categoria.nombre }}</mat-option>
+          } @empty {
+            <mat-option disabled>No hay categorías coincidentes</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+    }
+
+    <div class="formulario-acciones">
+      <a mat-stroked-button routerLink="/administracion/productos">Cancelar</a>
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading() || saving()">
+        {{ saving() ? 'Guardando...' : esEdicion ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+</section>

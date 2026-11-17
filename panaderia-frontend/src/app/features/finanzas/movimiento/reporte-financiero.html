@@ -1,0 +1,80 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">Reporte financiero</h2>
+      <p class="pagina__descripcion">
+        Resumen de ingresos y egresos del negocio. El resumen considera únicamente los movimientos
+        activos, es decir, excluye los movimientos anulados.
+      </p>
+    </div>
+    <div class="pagina__acciones">
+      <a mat-stroked-button routerLink="/finanzas/movimientos">
+        <mat-icon class="mat-icono-fila">swap_horiz</mat-icon>
+        Movimientos
+      </a>
+      <button mat-stroked-button type="button" (click)="cargar()" [disabled]="loading()">
+        <mat-icon class="mat-icono-fila">refresh</mat-icon>
+        Recargar
+      </button>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+      <div>
+        <button mat-stroked-button color="primary" type="button" (click)="cargar()">
+          <mat-icon class="mat-icono-fila">refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="pagina__cargando">
+      <mat-spinner diameter="36" />
+      <p>Cargando resumen financiero...</p>
+    </div>
+  } @else if (resumen(); as resumenFinanciero) {
+    <p class="reporte-nota">El resumen considera únicamente movimientos activos.</p>
+
+    <div class="reporte-indicadores">
+      <div class="indicador">
+        <span class="indicador__etiqueta">Cantidad de ingresos</span>
+        <span class="indicador__valor">{{ resumenFinanciero.cantidadIngresos }}</span>
+      </div>
+      <div class="indicador">
+        <span class="indicador__etiqueta">Monto de ingresos</span>
+        <span class="indicador__valor indicador__valor--moneda indicador__valor--positivo">{{
+          formatearMoneda(resumenFinanciero.montoIngresos)
+        }}</span>
+      </div>
+      <div class="indicador">
+        <span class="indicador__etiqueta">Cantidad de egresos</span>
+        <span class="indicador__valor">{{ resumenFinanciero.cantidadEgresos }}</span>
+      </div>
+      <div class="indicador">
+        <span class="indicador__etiqueta">Monto de egresos</span>
+        <span class="indicador__valor indicador__valor--moneda indicador__valor--negativo">{{
+          formatearMoneda(resumenFinanciero.montoEgresos)
+        }}</span>
+      </div>
+      <div class="indicador indicador--saldo" [attr.aria-label]="signoSaldo()">
+        <span class="indicador__etiqueta">Saldo</span>
+        <span
+          class="indicador__valor indicador__valor--moneda"
+          [class.indicador__valor--positivo]="saldoPositivo()"
+          [class.indicador__valor--negativo]="saldoNegativo()"
+          [class.indicador__valor--cero]="!saldoPositivo() && !saldoNegativo()"
+          aria-live="polite"
+        >
+          {{ formatearMoneda(resumenFinanciero.saldo) }}
+        </span>
+        <span class="indicador__detalle">{{ signoSaldo() }}</span>
+      </div>
+    </div>
+  } @else if (!error()) {
+    <p class="pagina__estado">No hay información financiera disponible</p>
+  }
+</section>

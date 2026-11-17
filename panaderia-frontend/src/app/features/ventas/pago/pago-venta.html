@@ -1,0 +1,302 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">Pagos de venta</h2>
+      <p class="pagina__descripcion">
+        Selecciona una venta para consultar sus cobros, registra nuevos pagos y anula los que
+        correspondan. Los pagos anulados se conservan en el historial y no cuentan en el saldo
+        pendiente.
+      </p>
+    </div>
+    <div class="pagina__acciones">
+      <a mat-stroked-button routerLink="/ventas/reporte">
+        <mat-icon class="mat-icono-fila">receipt_long</mat-icon>
+        Reporte de ventas
+      </a>
+      <button mat-stroked-button type="button" (click)="recargar()" [disabled]="!puedeRecargar()">
+        <mat-icon class="mat-icono-fila">refresh</mat-icon>
+        Recargar
+      </button>
+    </div>
+  </header>
+
+  @if (exito(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta tipo="exito" [mensaje]="mensaje" />
+    </div>
+  }
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  <div class="filtros">
+    <mat-form-field appearance="outline" class="filtros__campo">
+      <mat-label>Venta</mat-label>
+      <mat-select
+        aria-label="Venta seleccionada"
+        [value]="ventaSeleccionada()"
+        [disabled]="cargandoVentas()"
+        (selectionChange)="seleccionarVenta($event.value)"
+      >
+        <mat-option [value]="null">Selecciona una venta</mat-option>
+        @for (venta of ventas(); track venta.id) {
+          <mat-option [value]="venta" [attr.aria-label]="etiquetaVenta(venta)">
+            <span class="opcion-titulo">Venta #{{ venta.id }}</span>
+            <span class="opcion-detalle">
+              {{ venta.cliente.nombreRazonSocial }} · {{ venta.fecha | date: 'dd/MM/yyyy' }} ·
+              {{ formatearMoneda(venta.total ?? 0) }} ·
+              {{ venta.estado === 'REGISTRADA' ? 'Registrada' : 'Anulada' }}
+            </span>
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (cargandoVentas()) {
+      <div class="filtros__cargando">
+        <mat-spinner diameter="24" />
+      </div>
+    }
+  </div>
+
+  @if (ventaSeleccionada(); as venta) {
+    <div class="venta-seleccionada">
+      <div class="venta-seleccionada__dato">
+        <span class="venta-seleccionada__etiqueta">Venta</span>
+        <span class="venta-seleccionada__valor">#{{ venta.id }}</span>
+      </div>
+      <div class="venta-seleccionada__dato">
+        <span class="venta-seleccionada__etiqueta">Cliente</span>
+        <span class="venta-seleccionada__valor">{{ venta.cliente.nombreRazonSocial }}</span>
+      </div>
+      <div class="venta-seleccionada__dato">
+        <span class="venta-seleccionada__etiqueta">Vendedor</span>
+        <span class="venta-seleccionada__valor">{{ nombreVendedor(venta.vendedor) }}</span>
+      </div>
+      <div class="venta-seleccionada__dato">
+        <span class="venta-seleccionada__etiqueta">Fecha</span>
+        <span class="venta-seleccionada__valor">{{ venta.fecha | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="venta-seleccionada__dato">
+        <span class="venta-seleccionada__etiqueta">Total</span>
+        <span class="venta-seleccionada__valor">{{ formatearMoneda(venta.total ?? 0) }}</span>
+      </div>
+      <div class="venta-seleccionada__dato">
+        <span class="venta-seleccionada__etiqueta">Estado de la venta</span>
+        <span
+          class="chip-estado"
+          [class.chip-estado--activo]="venta.estado === 'REGISTRADA'"
+          [class.chip-estado--inactivo]="venta.estado === 'ANULADA'"
+        >
+          {{ venta.estado === 'REGISTRADA' ? 'Registrada' : 'Anulada' }}
+        </span>
+      </div>
+    </div>
+
+    @if (resumen(); as resumenPagos) {
+      <div class="pago-indicadores">
+        <div class="indicador">
+          <span class="indicador__etiqueta">Total de venta</span>
+          <span class="indicador__valor indicador__valor--moneda">{{
+            formatearMoneda(resumenPagos.totalVenta)
+          }}</span>
+        </div>
+        <div class="indicador">
+          <span class="indicador__etiqueta">Total pagado</span>
+          <span class="indicador__valor indicador__valor--moneda">{{
+            formatearMoneda(resumenPagos.totalPagado)
+          }}</span>
+        </div>
+        <div class="indicador">
+          <span class="indicador__etiqueta">Saldo pendiente</span>
+          <span class="indicador__valor indicador__valor--moneda">{{
+            formatearMoneda(resumenPagos.saldoPendiente)
+          }}</span>
+        </div>
+        <div class="indicador">
+          <span class="indicador__etiqueta">Estado de pago</span>
+          <span [class]="claseChipEstadoVenta(resumenPagos.estadoPago)">
+            {{ etiquetaEstadoPagoVenta(resumenPagos.estadoPago) }}
+          </span>
+        </div>
+      </div>
+    }
+
+    @if (ventaEsAnulada()) {
+      <div class="pagina__mensajes">
+        <app-alerta mensaje="La venta seleccionada está anulada; solo puede consultar sus pagos." />
+      </div>
+    } @else if (ventaEstaPagada()) {
+      <div class="pagina__mensajes">
+        <app-alerta mensaje="La venta está pagada en su totalidad; no se admiten nuevos pagos." />
+      </div>
+    }
+
+    @if (cargandoPagos()) {
+      <div class="pagina__cargando">
+        <mat-spinner diameter="36" />
+        <p>Cargando pagos de la venta...</p>
+      </div>
+    } @else {
+      @if (pagos().length === 0) {
+        <p class="pagina__estado">Esta venta aún no tiene pagos registrados</p>
+      } @else {
+        <div class="tabla-contenedor">
+          <table mat-table class="tabla-material" [dataSource]="pagos()">
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef scope="col">ID</th>
+              <td mat-cell *matCellDef="let pago" class="celda-numerica">{{ pago.id }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef scope="col">Fecha</th>
+              <td mat-cell *matCellDef="let pago">
+                {{ pago.fecha | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="metodoPago">
+              <th mat-header-cell *matHeaderCellDef scope="col">Método</th>
+              <td mat-cell *matCellDef="let pago">{{ etiquetaMetodo(pago.metodoPago) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="referencia">
+              <th mat-header-cell *matHeaderCellDef scope="col">Referencia</th>
+              <td mat-cell *matCellDef="let pago">{{ pago.referencia || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="monto">
+              <th mat-header-cell *matHeaderCellDef scope="col" class="mat-column-numero">Monto</th>
+              <td mat-cell *matCellDef="let pago" class="mat-column-numero celda-numerica">
+                {{ formatearMoneda(pago.monto) }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef scope="col">Estado</th>
+              <td mat-cell *matCellDef="let pago">
+                <span
+                  class="chip-estado"
+                  [class.chip-estado--activo]="pago.estado === 'REGISTRADO'"
+                  [class.chip-estado--inactivo]="pago.estado === 'ANULADO'"
+                >
+                  {{ etiquetaEstadoPago(pago.estado) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef scope="col" class="mat-column-acciones">
+                Acciones
+              </th>
+              <td mat-cell *matCellDef="let pago" class="mat-column-acciones">
+                @if (pago.estado === 'REGISTRADO' && puedeAnular()) {
+                  <span class="celda-acciones">
+                    <button
+                      mat-stroked-button
+                      color="warn"
+                      type="button"
+                      [disabled]="anulandoId() !== null"
+                      [attr.aria-label]="'Anular pago ' + pago.id"
+                      (click)="anular(pago)"
+                    >
+                      <mat-icon>block</mat-icon>
+                      {{ anulandoId() === pago.id ? 'Anulando...' : 'Anular' }}
+                    </button>
+                  </span>
+                }
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+            <tr mat-row *matRowDef="let fila; columns: columnas"></tr>
+          </table>
+        </div>
+      }
+    }
+
+    <form
+      class="formulario-tarjeta pago-formulario"
+      [formGroup]="form"
+      (ngSubmit)="registrar()"
+      novalidate
+    >
+      <h3 class="pago-formulario__titulo">Registrar pago</h3>
+
+      <div class="formulario-rejilla">
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>Método de pago</mat-label>
+          <mat-select formControlName="metodoPago">
+            @for (metodo of metodosPago; track metodo) {
+              <mat-option [value]="metodo">{{ etiquetaMetodo(metodo) }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.metodoPago.touched && form.controls.metodoPago.hasError('required')) {
+            <mat-error>El método de pago es obligatorio</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>Monto</mat-label>
+          <span matPrefix>S/&nbsp;</span>
+          <input
+            matInput
+            type="number"
+            formControlName="monto"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+          />
+          @if (form.controls.monto.touched && form.controls.monto.hasError('required')) {
+            <mat-error>El monto es obligatorio</mat-error>
+          }
+          @if (form.controls.monto.touched && form.controls.monto.hasError('montoNoPositivo')) {
+            <mat-error>El monto debe ser mayor que cero</mat-error>
+          }
+          @if (form.controls.monto.touched && form.controls.monto.hasError('montoDecimales')) {
+            <mat-error>El monto admite hasta dos decimales</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Referencia (opcional)</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="referencia"
+          maxlength="100"
+          placeholder="Boleta, número de operación u otro identificador"
+        />
+        @if (form.controls.referencia.touched && form.controls.referencia.hasError('maxlength')) {
+          <mat-error>La referencia admite hasta 100 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      @if (montoExcedeSaldo()) {
+        <p class="pago-formulario__nota" role="alert">
+          El monto no puede superar el saldo pendiente de
+          {{ formatearMoneda(resumen()?.saldoPendiente ?? 0) }}.
+        </p>
+      }
+
+      <div class="formulario-acciones">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="!puedeRegistrar()"
+          aria-label="Registrar pago"
+        >
+          <mat-icon class="mat-icono-fila">payments</mat-icon>
+          {{ guardando() ? 'Registrando...' : 'Registrar pago' }}
+        </button>
+      </div>
+    </form>
+  } @else {
+    <p class="pagina__estado">Selecciona una venta para consultar y registrar sus pagos</p>
+  }
+</section>

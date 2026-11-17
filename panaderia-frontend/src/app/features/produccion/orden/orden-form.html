@@ -1,0 +1,264 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">Nueva orden de producción</h2>
+      <p class="pagina__descripcion">
+        Registra una orden ya completada: el backend descuenta los insumos consumidos y repone
+        la existencia del producto terminado en una sola transacción.
+      </p>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  @if (catalogosError(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  <form class="formulario-tarjeta orden-tarjeta" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <div class="formulario-rejilla">
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Producto elaborado</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="productoTexto"
+          [matAutocomplete]="autoProducto"
+          (input)="actualizarTextoProducto($any($event.target).value)"
+          placeholder="Busque por nombre"
+          autocomplete="off"
+        />
+        @if (form.controls.productoTexto.touched && form.controls.productoTexto.hasError('required')) {
+          <mat-error>El producto es obligatorio</mat-error>
+        }
+        @if (
+          form.controls.productoTexto.touched && form.controls.productoTexto.hasError('productoInvalido')
+        ) {
+          <mat-error>Seleccione un producto de la lista</mat-error>
+        }
+        @if (form.controls.productoId.touched && form.controls.productoId.hasError('required')) {
+          <mat-error>Debe seleccionar un producto de la lista</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Cantidad producida</mat-label>
+        <input matInput type="number" step="0.001" min="0.001" formControlName="cantidadProducida" />
+        @if (
+          form.controls.cantidadProducida.touched &&
+          form.controls.cantidadProducida.hasError('required')
+        ) {
+          <mat-error>La cantidad producida es obligatoria</mat-error>
+        }
+        @if (
+          form.controls.cantidadProducida.touched &&
+          form.controls.cantidadProducida.hasError('positivo')
+        ) {
+          <mat-error>La cantidad producida debe ser mayor que cero</mat-error>
+        }
+        @if (
+          form.controls.cantidadProducida.touched &&
+          form.controls.cantidadProducida.hasError('maximo')
+        ) {
+          <mat-error>La cantidad producida es demasiado grande</mat-error>
+        }
+        @if (
+          form.controls.cantidadProducida.touched &&
+          form.controls.cantidadProducida.hasError('decimales')
+        ) {
+          <mat-error>Máximo 3 decimales</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-autocomplete #autoProducto="matAutocomplete" (optionSelected)="alSeleccionarProducto($event.option.value)">
+      @for (producto of productosFiltrados(); track producto.id) {
+        <mat-option [value]="producto">
+          <span class="opcion-titulo">{{ producto.nombre }}</span>
+          <span class="opcion-detalle">
+            {{ producto.categoria.nombre }} · S/ {{ producto.precio }}
+            @if (existenciaDe(producto.id); as existencia) {
+              · Existencia: {{ existencia }}
+            }
+          </span>
+        </mat-option>
+      }
+      @if (productosFiltrados().length === 0) {
+        <mat-option disabled>Sin productos que coincidan</mat-option>
+      }
+    </mat-autocomplete>
+
+    @if (catalogosLoading()) {
+      <div class="formulario-cargando">
+        <mat-spinner diameter="32" />
+        <p>Cargando catálogos de productos, insumos y existencias...</p>
+      </div>
+    }
+
+    <h3 class="orden-subtitulo">Detalle de consumo</h3>
+
+    <div class="detalle-lineas" formArrayName="insumos">
+      @if (form.controls.insumos.hasError('insumoDuplicado')) {
+        <p class="orden-error-array">Cada insumo puede aparecer una sola vez en el detalle.</p>
+      }
+
+      @for (linea of lineas(); track $index; let i = $index) {
+        <div class="linea" [formGroupName]="i">
+          <div class="linea__encabezado">
+            <span class="linea__numero">Línea {{ i + 1 }}</span>
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              aria-label="Quitar línea"
+              [disabled]="!puedeQuitarLinea"
+              (click)="quitarLinea(i)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <div class="formulario-rejilla">
+            <mat-form-field appearance="outline" class="formulario-campo">
+              <mat-label>Insumo consumido</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="insumoTexto"
+                [matAutocomplete]="autoInsumo"
+                (input)="actualizarTextoInsumo(i, $any($event.target).value)"
+                placeholder="Busque un insumo"
+                autocomplete="off"
+              />
+              @if (linea.insumo; as insumo) {
+                <mat-hint>{{ insumo.unidadMedida }} · Stock actual: {{ insumo.stockActual }}</mat-hint>
+              }
+              @if (form.controls.insumos.at(i).get('insumoTexto')!.touched &&
+                form.controls.insumos.at(i).get('insumoTexto')!.hasError('required')) {
+                <mat-error>El insumo es obligatorio</mat-error>
+              }
+              @if (form.controls.insumos.at(i).get('insumoTexto')!.touched &&
+                form.controls.insumos.at(i).get('insumoTexto')!.hasError('insumoInvalido')) {
+                <mat-error>Seleccione un insumo de la lista</mat-error>
+              }
+              @if (form.controls.insumos.at(i).get('insumoId')!.touched &&
+                form.controls.insumos.at(i).get('insumoId')!.hasError('required')) {
+                <mat-error>Debe seleccionar un insumo de la lista</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="formulario-campo">
+              <mat-label>Cantidad consumida</mat-label>
+              <input matInput type="number" step="0.001" min="0.001" formControlName="cantidadConsumida" />
+              @if (
+                form.controls.insumos.at(i).get('cantidadConsumida')!.touched &&
+                form.controls.insumos.at(i).get('cantidadConsumida')!.hasError('required')
+              ) {
+                <mat-error>La cantidad consumida es obligatoria</mat-error>
+              }
+              @if (
+                form.controls.insumos.at(i).get('cantidadConsumida')!.touched &&
+                form.controls.insumos.at(i).get('cantidadConsumida')!.hasError('positivo')
+              ) {
+                <mat-error>La cantidad debe ser mayor que cero</mat-error>
+              }
+              @if (
+                form.controls.insumos.at(i).get('cantidadConsumida')!.touched &&
+                form.controls.insumos.at(i).get('cantidadConsumida')!.hasError('maximo')
+              ) {
+                <mat-error>La cantidad es demasiado grande</mat-error>
+              }
+              @if (
+                form.controls.insumos.at(i).get('cantidadConsumida')!.touched &&
+                form.controls.insumos.at(i).get('cantidadConsumida')!.hasError('decimales')
+              ) {
+                <mat-error>Máximo 3 decimales</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-autocomplete
+            #autoInsumo="matAutocomplete"
+            (optionSelected)="alSeleccionarInsumo(i, $event.option.value)"
+          >
+            @for (insumo of insumosFiltrados()[i]; track insumo.id) {
+              <mat-option [value]="insumo">
+                <span class="opcion-titulo">{{ insumo.nombre }}</span>
+                <span class="opcion-detalle">{{ insumo.unidadMedida }} · Stock {{ insumo.stockActual }}</span>
+              </mat-option>
+            }
+            @if (insumosFiltrados()[i].length === 0) {
+              <mat-option disabled>Sin insumos que coincidan</mat-option>
+            }
+          </mat-autocomplete>
+
+          @if (linea.insumo; as insumo) {
+            <p class="linea__detalle">
+              Consumo por unidad producida:
+              <strong>{{ linea.consumoPorUnidad | number: '1.0-4' }}</strong>
+              {{ insumo.unidadMedida }}
+            </p>
+            @if (linea.cantidadConsumida > 0) {
+              <p class="linea__detalle">
+                Stock posterior estimado:
+                <strong>{{ linea.stockPosterior | number: '1.0-3' }}</strong>
+                {{ insumo.unidadMedida }}
+              </p>
+            }
+          }
+        </div>
+      }
+    </div>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      class="orden-agregar"
+      (click)="agregarLinea()"
+    >
+      <mat-icon class="mat-icono-fila">add</mat-icon>
+      Agregar insumo
+    </button>
+
+    <div class="orden-resumen">
+      <div class="orden-resumen__item">
+        <span class="orden-resumen__etiqueta">Clases de insumo</span>
+        <span class="orden-resumen__valor">{{ tiposInsumos() }}</span>
+      </div>
+      <div class="orden-resumen__item">
+        <span class="orden-resumen__etiqueta">Líneas válidas</span>
+        <span class="orden-resumen__valor">{{ lineasValidas() }}</span>
+      </div>
+      <div class="orden-resumen__item orden-resumen__item--unidades">
+        <span class="orden-resumen__etiqueta">Consumo por unidad de medida</span>
+        <div class="orden-chips">
+          @for (grupo of resumenPorUnidad(); track grupo.unidad) {
+            <span class="chip-consumo">{{ grupo.total | number: '1.0-3' }} {{ grupo.unidad }}</span>
+          }
+          @if (resumenPorUnidad().length === 0) {
+            <span class="chip-consumo chip-consumo--vacio">Sin consumos válidos</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="formulario-acciones">
+      <a mat-stroked-button routerLink="/produccion/ordenes">Cancelar</a>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="saving() || catalogosLoading()"
+      >
+        {{ saving() ? 'Registrando...' : 'Registrar orden' }}
+      </button>
+    </div>
+  </form>
+</section>

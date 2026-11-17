@@ -1,0 +1,93 @@
+<section class="existencia-form">
+  <div class="existencia-form__cabecera">
+    <h2 class="existencia-form__titulo">
+      {{ esEdicion ? 'Editar existencia' : 'Nueva existencia' }}
+    </h2>
+    <p class="existencia-form__descripcion">
+      {{
+        esEdicion
+          ? 'Modifica el producto y la cantidad disponible de la existencia seleccionada.'
+          : 'Registra la cantidad disponible de un producto terminado.'
+      }}
+    </p>
+  </div>
+
+  @if (error(); as mensaje) {
+    <app-alerta [mensaje]="mensaje" />
+
+    @if (productoAusente()) {
+      <button
+        mat-stroked-button
+        type="button"
+        class="boton-recargar"
+        [disabled]="productosLoading()"
+        (click)="recargarProductos()"
+      >
+        {{ productosLoading() ? 'Recargando...' : 'Recargar productos' }}
+      </button>
+    }
+  }
+
+  @if (productosError(); as mensaje) {
+    <app-alerta [mensaje]="mensaje" />
+  }
+
+  <form class="tarjeta" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    @if (loading()) {
+      <div class="existencia-form__cargando">
+        <mat-spinner diameter="36" />
+        <p class="existencia-form__estado">Cargando existencia...</p>
+      </div>
+    } @else {
+      <div class="campo">
+        <mat-form-field appearance="outline" class="campo__completo">
+          <mat-label>Producto</mat-label>
+          <mat-select formControlName="productoId">
+            <mat-option [value]="null">Seleccione un producto</mat-option>
+            @for (producto of productos(); track producto.id) {
+              <mat-option [value]="producto.id">{{ producto.nombre }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.productoId.touched && form.controls.productoId.hasError('required')) {
+            <mat-error>Debe seleccionar un producto</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="campo">
+        <mat-form-field appearance="outline" class="campo__completo">
+          <mat-label>Cantidad</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="cantidad"
+            min="0"
+            step="0.001"
+            inputmode="decimal"
+          />
+          @if (form.controls.cantidad.touched && form.controls.cantidad.hasError('required')) {
+            <mat-error>Campo obligatorio</mat-error>
+          }
+          @if (form.controls.cantidad.touched && form.controls.cantidad.hasError('min')) {
+            <mat-error>El valor no puede ser negativo</mat-error>
+          }
+          @if (form.controls.cantidad.touched && form.controls.cantidad.hasError('decimales')) {
+            <mat-error>Máximo tres decimales</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    }
+
+    <div class="acciones">
+      <a mat-stroked-button class="boton" routerLink="/inventario/existencias">Cancelar</a>
+      <button
+        mat-flat-button
+        class="boton boton--primario"
+        type="submit"
+        [disabled]="loading() || saving()"
+      >
+        {{ saving() ? 'Guardando...' : esEdicion ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+</section>

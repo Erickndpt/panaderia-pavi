@@ -1,0 +1,73 @@
+:host {
+  display: block;
+}
+.confirmacion {
+  width: min(440px, calc(100vw - 2rem));
+  padding: 1.5rem 1.5rem 1.25rem;
+  color: #3b2416;
+  text-align: center;
+}
+.confirmacion__icono {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto 0.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #f5e8bd;
+  color: #7a5b00;
+}
+.confirmacion__icono--peligro {
+  background: #f8e2df;
+  color: #a33128;
+}
+.confirmacion__icono mat-icon {
+  width: 2rem;
+  height: 2rem;
+  font-size: 2rem;
+}
+h2[mat-dialog-title] {
+  margin: 0;
+  padding: 0;
+  color: #3b2416;
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-align: center;
+}
+mat-dialog-content {
+  padding: 0.75rem 0 0 !important;
+  color: #6f4e37;
+}
+.confirmacion__mensaje {
+  margin: 0;
+  line-height: 1.55;
+}
+.confirmacion__detalle {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e4d5bb;
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #3b2416;
+  line-height: 1.55;
+  text-align: left;
+  white-space: pre-line;
+}
+mat-dialog-actions {
+  gap: 0.75rem;
+  padding: 1.25rem 0 0 !important;
+}
+mat-dialog-actions button {
+  min-width: 120px;
+}
+@media (width <= 480px) {
+  .confirmacion {
+    padding-inline: 1rem;
+  }
+  mat-dialog-actions {
+    flex-direction: column-reverse;
+  }
+  mat-dialog-actions button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,184 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">Órdenes de producción</h2>
+      <p class="pagina__descripcion">
+        Consulta las órdenes registradas con el detalle real de insumos consumidos. El stock ya
+        fue actualizado por el backend al registrar cada orden.
+      </p>
+    </div>
+    <div class="pagina__acciones">
+      <a mat-flat-button color="primary" routerLink="/produccion/nueva">
+        <mat-icon class="mat-icono-fila">playlist_add</mat-icon>
+        Nueva orden
+      </a>
+      <a mat-stroked-button routerLink="/inventario/existencias">
+        <mat-icon class="mat-icono-fila">warehouse</mat-icon>
+        Existencias
+      </a>
+      <a mat-stroked-button routerLink="/inventario/insumos">
+        <mat-icon class="mat-icono-fila">grain</mat-icon>
+        Insumos
+      </a>
+      <button mat-stroked-button type="button" (click)="cargar()" [disabled]="loading()">
+        <mat-icon class="mat-icono-fila">refresh</mat-icon>
+        Recargar
+      </button>
+    </div>
+  </header>
+
+  @if (exito(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" tipo="exito" />
+    </div>
+  }
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  <div class="filtros">
+    <mat-form-field appearance="outline" class="filtros__campo">
+      <mat-label>Producto</mat-label>
+      <input
+        matInput
+        type="text"
+        [value]="filtroProducto()"
+        (input)="actualizarFiltroProducto($any($event.target).value)"
+        placeholder="Filtrar por nombre de producto"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtros__campo--angosto">
+      <mat-label>Estado</mat-label>
+      <mat-select [value]="filtroEstado()" (selectionChange)="actualizarFiltroEstado($event.value)">
+        <mat-option value="TODAS">Todas</mat-option>
+        <mat-option value="COMPLETADA">Completada</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtros__campo--angosto">
+      <mat-label>Desde</mat-label>
+      <input
+        matInput
+        type="date"
+        [value]="borradorDesde()"
+        (input)="actualizarBorradorDesde($any($event.target).value)"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtros__campo--angosto">
+      <mat-label>Hasta</mat-label>
+      <input
+        matInput
+        type="date"
+        [value]="borradorHasta()"
+        (input)="actualizarBorradorHasta($any($event.target).value)"
+      />
+    </mat-form-field>
+
+    <div class="filtros__acciones">
+      <button mat-flat-button color="primary" type="button" (click)="aplicarFechas()">Aplicar</button>
+      <button mat-stroked-button type="button" (click)="limpiarFechas()">Limpiar</button>
+    </div>
+  </div>
+
+  @if (errorFechas(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="pagina__cargando">
+      <mat-spinner diameter="36" />
+      <p>Cargando órdenes de producción...</p>
+    </div>
+  } @else {
+    <div class="orden-indicadores">
+      <div class="indicador">
+        <span class="indicador__etiqueta">Órdenes visibles</span>
+        <span class="indicador__valor">{{ resumen().ordenes }}</span>
+      </div>
+      <div class="indicador">
+        <span class="indicador__etiqueta">Productos diferentes</span>
+        <span class="indicador__valor">{{ resumen().productos }}</span>
+      </div>
+      <div class="indicador">
+        <span class="indicador__etiqueta">Líneas de consumo</span>
+        <span class="indicador__valor">{{ resumen().lineas }}</span>
+      </div>
+      <div class="indicador">
+        <span class="indicador__etiqueta">Producción total</span>
+        @if (resumen().unicoProducto) {
+          <span class="indicador__valor">
+            {{ resumen().cantidadProducida | number: '1.0-3' }}
+            <small class="indicador__nota">{{ resumen().nombreProducto }}</small>
+          </span>
+        } @else {
+          <span class="indicador__valor indicador__valor--vacio">—</span>
+          <small class="indicador__nota">Filtre un producto para totalizar</small>
+        }
+      </div>
+    </div>
+
+    @if (ordenes().length === 0) {
+      <p class="pagina__estado">No hay órdenes de producción registradas</p>
+    } @else if (ordenesFiltradas().length === 0) {
+      <p class="pagina__estado">No se encontraron órdenes que coincidan con los filtros aplicados</p>
+    } @else {
+      <div class="orden-lista">
+        @for (orden of ordenesFiltradas(); track orden.id) {
+          <mat-card appearance="outlined" class="orden-card">
+            <header class="orden-card__cabecera">
+              <div class="orden-card__identidad">
+                <span class="orden-card__id">Orden #{{ orden.id }}</span>
+                <span class="orden-card__fecha">{{ orden.fecha | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="orden-card__producto">
+                <span class="orden-card__nombre">{{ orden.nombreProducto }}</span>
+                <span class="orden-card__cantidad">
+                  Producido: {{ orden.cantidadProducida | number: '1.0-3' }}
+                </span>
+              </div>
+              <div class="orden-card__meta">
+                <span class="chip-estado chip-estado--activo">{{ orden.estado }}</span>
+                <span class="orden-card__insumos">
+                  {{ orden.detalles.length }} insumo{{ orden.detalles.length === 1 ? '' : 's' }}
+                </span>
+              </div>
+            </header>
+
+            <div class="tabla-contenedor">
+              <table mat-table class="tabla-material" [dataSource]="orden.detalles">
+                <ng-container matColumnDef="insumo">
+                  <th mat-header-cell *matHeaderCellDef>Insumo</th>
+                  <td mat-cell *matCellDef="let detalle" class="celda-nombre">
+                    {{ detalle.nombreInsumo }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="unidad">
+                  <th mat-header-cell *matHeaderCellDef>Unidad</th>
+                  <td mat-cell *matCellDef="let detalle">{{ detalle.unidadMedida }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="cantidad">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-numero">Consumido</th>
+                  <td mat-cell *matCellDef="let detalle" class="mat-column-numero celda-numerica">
+                    {{ detalle.cantidadConsumida | number: '1.0-3' }}
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="columnasDetalle"></tr>
+                <tr mat-row *matRowDef="let fila; columns: columnasDetalle"></tr>
+              </table>
+            </div>
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</section>

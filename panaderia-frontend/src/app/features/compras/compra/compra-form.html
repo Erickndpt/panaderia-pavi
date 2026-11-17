@@ -1,0 +1,210 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">Nueva compra</h2>
+      <p class="pagina__descripcion">
+        Registra la compra seleccionando un proveedor activo y una o más líneas de detalle.
+        El total se calcula automáticamente a partir de cantidades y precios unitarios.
+      </p>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  @if (catalogosError(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  <form class="formulario-tarjeta compra-tarjeta" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <mat-form-field appearance="outline" class="formulario-campo">
+      <mat-label>Proveedor</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="proveedorTexto"
+        [matAutocomplete]="autoProveedor"
+        (input)="actualizarTextoProveedor($any($event.target).value)"
+        placeholder="Busque por razón social o RUC"
+        autocomplete="off"
+      />
+      <mat-hint>Solo se muestran proveedores activos.</mat-hint>
+      @if (form.controls.proveedorTexto.touched && form.controls.proveedorTexto.hasError('required')) {
+        <mat-error>El proveedor es obligatorio</mat-error>
+      }
+      @if (
+        form.controls.proveedorTexto.touched && form.controls.proveedorTexto.hasError('proveedorInvalido')
+      ) {
+        <mat-error>Seleccione un proveedor activo de la lista</mat-error>
+      }
+      @if (form.controls.proveedorId.touched && form.controls.proveedorId.hasError('required')) {
+        <mat-error>Debe seleccionar un proveedor de la lista</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-autocomplete #autoProveedor="matAutocomplete" (optionSelected)="alSeleccionarProveedor($event.option.value)">
+      @for (proveedor of proveedoresFiltrados(); track proveedor.id) {
+        <mat-option [value]="proveedor">
+          <span class="opcion-titulo">{{ proveedor.razonSocial }}</span>
+          <span class="opcion-detalle">RUC {{ proveedor.ruc }}</span>
+        </mat-option>
+      }
+      @if (proveedoresFiltrados().length === 0) {
+        <mat-option disabled>Sin proveedores activos que coincidan</mat-option>
+      }
+    </mat-autocomplete>
+
+    @if (catalogosLoading()) {
+      <div class="formulario-cargando">
+        <mat-spinner diameter="32" />
+        <p>Cargando catálogos de proveedores e insumos...</p>
+      </div>
+    }
+
+    <h3 class="compra-subtitulo">Detalle de la compra</h3>
+
+    <div class="detalle-lineas" formArrayName="detalles">
+      @for (linea of lineas(); track $index; let i = $index) {
+        <div class="linea" [formGroupName]="i">
+          <div class="linea__encabezado">
+            <span class="linea__numero">Línea {{ i + 1 }}</span>
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              aria-label="Quitar línea"
+              [disabled]="!puedeQuitarLinea"
+              (click)="quitarLinea(i)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <mat-form-field appearance="outline" class="formulario-campo">
+            <mat-label>Insumo</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="insumoTexto"
+              [matAutocomplete]="autoInsumo"
+              (input)="actualizarTextoInsumo(i, $any($event.target).value)"
+              placeholder="Busque un insumo"
+              autocomplete="off"
+            />
+            @if (linea.insumo; as insumo) {
+              <mat-hint>{{ insumo.unidadMedida }} · Stock actual: {{ insumo.stockActual }}</mat-hint>
+            }
+            @if (form.controls.detalles.at(i).get('insumoTexto')!.touched &&
+              form.controls.detalles.at(i).get('insumoTexto')!.hasError('required')) {
+              <mat-error>El insumo es obligatorio</mat-error>
+            }
+            @if (form.controls.detalles.at(i).get('insumoTexto')!.touched &&
+              form.controls.detalles.at(i).get('insumoTexto')!.hasError('insumoInvalido')) {
+              <mat-error>Seleccione un insumo de la lista</mat-error>
+            }
+            @if (form.controls.detalles.at(i).get('insumoId')!.touched &&
+              form.controls.detalles.at(i).get('insumoId')!.hasError('required')) {
+              <mat-error>Debe seleccionar un insumo de la lista</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-autocomplete
+            #autoInsumo="matAutocomplete"
+            (optionSelected)="alSeleccionarInsumo(i, $event.option.value)"
+          >
+            @for (insumo of insumosFiltrados()[i]; track insumo.id) {
+              <mat-option [value]="insumo">
+                <span class="opcion-titulo">{{ insumo.nombre }}</span>
+                <span class="opcion-detalle">{{ insumo.unidadMedida }} · Stock {{ insumo.stockActual }}</span>
+              </mat-option>
+            }
+            @if (insumosFiltrados()[i].length === 0) {
+              <mat-option disabled>Sin insumos que coincidan</mat-option>
+            }
+          </mat-autocomplete>
+
+          <div class="formulario-rejilla">
+            <mat-form-field appearance="outline" class="formulario-campo">
+              <mat-label>Cantidad</mat-label>
+              <input matInput type="number" step="0.001" min="0.001" formControlName="cantidad" />
+              @if (form.controls.detalles.at(i).get('cantidad')!.touched &&
+                form.controls.detalles.at(i).get('cantidad')!.hasError('required')) {
+                <mat-error>La cantidad es obligatoria</mat-error>
+              }
+              @if (form.controls.detalles.at(i).get('cantidad')!.touched &&
+                form.controls.detalles.at(i).get('cantidad')!.hasError('positivo')) {
+                <mat-error>La cantidad debe ser mayor que cero</mat-error>
+              }
+              @if (form.controls.detalles.at(i).get('cantidad')!.touched &&
+                form.controls.detalles.at(i).get('cantidad')!.hasError('maximo')) {
+                <mat-error>La cantidad es demasiado grande</mat-error>
+              }
+              @if (form.controls.detalles.at(i).get('cantidad')!.touched &&
+                form.controls.detalles.at(i).get('cantidad')!.hasError('decimales')) {
+                <mat-error>Máximo 3 decimales</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="formulario-campo">
+              <mat-label>Precio unitario (S/)</mat-label>
+              <input matInput type="number" step="0.01" min="0" formControlName="precioUnitario" />
+              @if (form.controls.detalles.at(i).get('precioUnitario')!.touched &&
+                form.controls.detalles.at(i).get('precioUnitario')!.hasError('required')) {
+                <mat-error>El precio unitario es obligatorio</mat-error>
+              }
+              @if (form.controls.detalles.at(i).get('precioUnitario')!.touched &&
+                form.controls.detalles.at(i).get('precioUnitario')!.hasError('negativo')) {
+                <mat-error>El precio no puede ser negativo</mat-error>
+              }
+              @if (form.controls.detalles.at(i).get('precioUnitario')!.touched &&
+                form.controls.detalles.at(i).get('precioUnitario')!.hasError('entero')) {
+                <mat-error>El precio es demasiado grande</mat-error>
+              }
+              @if (form.controls.detalles.at(i).get('precioUnitario')!.touched &&
+                form.controls.detalles.at(i).get('precioUnitario')!.hasError('decimales')) {
+                <mat-error>Máximo 2 decimales</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <p class="linea__subtotal">
+            Subtotal: <strong>{{ formatearMoneda(linea.subtotal) }}</strong>
+          </p>
+        </div>
+      }
+    </div>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      class="compra-agregar"
+      (click)="agregarLinea()"
+    >
+      <mat-icon class="mat-icono-fila">add</mat-icon>
+      Agregar línea
+    </button>
+
+    <div class="compra-total">
+      <span class="compra-total__etiqueta">Total estimado</span>
+      <span class="compra-total__valor">{{ formatearMoneda(totalEstimado()) }}</span>
+    </div>
+
+    <div class="formulario-acciones">
+      <a mat-stroked-button routerLink="/compras/reporte">Cancelar</a>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="saving() || catalogosLoading()"
+      >
+        {{ saving() ? 'Registrando...' : 'Registrar compra' }}
+      </button>
+    </div>
+  </form>
+</section>

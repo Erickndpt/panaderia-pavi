@@ -1,0 +1,10 @@
+﻿spring:
+  application:
+    name: panaderia-backend
+  profiles:
+    active: dev
+peru-api:
+  base-url: https://peruapi.com
+  api-key: ${PERU_API_KEY:}
+
+

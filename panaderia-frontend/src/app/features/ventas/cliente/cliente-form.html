@@ -1,0 +1,170 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">{{ esEdicion ? 'Editar cliente' : 'Nuevo cliente' }}</h2>
+      <p class="pagina__descripcion">
+        {{
+          esEdicion
+            ? 'Modifica los datos o el estado del cliente seleccionado.'
+            : 'Registra un nuevo cliente con su documento y datos de contacto.'
+        }}
+      </p>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+  @if (consultaMensaje(); as msgConsulta) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="msgConsulta" />
+    </div>
+  }
+  <form class="formulario-tarjeta" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    @if (loading()) {
+      <div class="formulario-cargando">
+        <mat-spinner diameter="36" />
+        <p>Cargando cliente...</p>
+      </div>
+    } @else {
+      <div class="formulario-rejilla">
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>Tipo de documento</mat-label>
+          <mat-select formControlName="tipoDocumento">
+            @for (tipo of tipos; track tipo.valor) {
+              <mat-option [value]="tipo.valor">{{ tipo.etiqueta }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="consulta-documento">
+          <mat-form-field appearance="outline" class="formulario-campo consulta-documento__campo">
+            <mat-label>Número de documento</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="numeroDocumento"
+              maxlength="20"
+              autocomplete="off"
+              [placeholder]="esSinDocumento ? 'No aplica' : 'Número de documento'"
+            />
+            @if (
+              !esSinDocumento &&
+              form.controls.numeroDocumento.touched &&
+              form.controls.numeroDocumento.hasError('required')
+            ) {
+              <mat-error>El número de documento es obligatorio</mat-error>
+            }
+            @if (
+              !esSinDocumento &&
+              form.controls.numeroDocumento.touched &&
+              form.controls.numeroDocumento.hasError('pattern')
+            ) {
+              <mat-error>
+                {{ tipoActual === 'DNI'
+                  ? 'El DNI debe contener exactamente 8 dígitos'
+                  : 'El RUC debe contener exactamente 11 dígitos' }}
+              </mat-error>
+            }
+            @if (
+              !esSinDocumento &&
+              form.controls.numeroDocumento.touched &&
+              form.controls.numeroDocumento.hasError('minlength')
+            ) {
+              <mat-error>El documento debe tener al menos 3 caracteres</mat-error>
+            }
+            @if (esSinDocumento) {
+              <mat-hint>El tipo Sin documento no admite número de documento</mat-hint>
+            }
+          </mat-form-field>
+          @if (!esSinDocumento && (tipoActual === 'DNI' || tipoActual === 'RUC')) {
+            <button
+              mat-stroked-button
+              type="button"
+              class="consulta-documento__boton"
+              [disabled]="!puedeConsultar()"
+              (click)="consultarDocumento()"
+            >
+              <mat-icon>search</mat-icon>
+              {{ consultando() ? 'Consultando...' : 'Consultar' }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Nombre o razón social</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="nombreRazonSocial"
+          maxlength="150"
+          autocomplete="off"
+          placeholder="Ej. María López"
+        />
+        @if (
+          form.controls.nombreRazonSocial.touched &&
+          form.controls.nombreRazonSocial.hasError('required')
+        ) {
+          <mat-error>El nombre o razón social es obligatorio</mat-error>
+        }
+        @if (
+          form.controls.nombreRazonSocial.touched &&
+          form.controls.nombreRazonSocial.hasError('maxlength')
+        ) {
+          <mat-error>Máximo 150 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="formulario-rejilla">
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>Teléfono</mat-label>
+          <input matInput type="tel" formControlName="telefono" maxlength="20" placeholder="Opcional" />
+          @if (form.controls.telefono.touched && form.controls.telefono.hasError('maxlength')) {
+            <mat-error>Máximo 20 caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" maxlength="120" placeholder="Opcional" />
+          @if (form.controls.email.touched && form.controls.email.hasError('email')) {
+            <mat-error>Ingrese un correo válido</mat-error>
+          }
+          @if (form.controls.email.touched && form.controls.email.hasError('maxlength')) {
+            <mat-error>Máximo 120 caracteres</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Dirección</mat-label>
+        <input matInput type="text" formControlName="direccion" maxlength="200" placeholder="Opcional" />
+        @if (form.controls.direccion.touched && form.controls.direccion.hasError('maxlength')) {
+          <mat-error>Máximo 200 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>País</mat-label>
+        <input matInput type="text" formControlName="pais" maxlength="80" placeholder="Opcional" />
+        @if (form.controls.pais.touched && form.controls.pais.hasError('maxlength')) {
+          <mat-error>Máximo 80 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-slide-toggle color="primary" formControlName="activo">Cliente activo</mat-slide-toggle>
+    }
+
+    <div class="formulario-acciones">
+      <a mat-stroked-button routerLink="/ventas/clientes">Cancelar</a>
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading() || saving()">
+        {{ saving() ? 'Guardando...' : esEdicion ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+</section>
+
+

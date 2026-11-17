@@ -1,0 +1,23 @@
+<section class="callback">
+  <div class="callback__tarjeta">
+    <mat-icon class="callback__icono" aria-hidden="true">
+      {{ estado() === 'error' ? 'error_outline' : 'lock' }}
+    </mat-icon>
+    <h1 class="callback__titulo">
+      {{ estado() === 'error' ? 'No pudimos iniciar sesión' : 'Iniciando sesión' }}
+    </h1>
+    <p class="callback__mensaje">{{ mensaje() }}</p>
+
+    @if (estado() === 'procesando') {
+      <mat-spinner diameter="36" aria-label="Completando inicio de sesión" />
+    } @else {
+      <div class="callback__acciones">
+        <button mat-flat-button color="primary" type="button" (click)="reintentar()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+        <a mat-stroked-button routerLink="/">Volver al inicio</a>
+      </div>
+    }
+  </div>
+</section>

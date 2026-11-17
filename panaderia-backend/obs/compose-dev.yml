@@ -1,0 +1,11 @@
+name: panaderia-obs-dev
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.14.0
+    container_name: panaderia-prometheus
+    restart: unless-stopped
+    ports:
+      - "39090:9090"
+    volumes:
+      - ./prometheus/prometheus-dev.yml:/etc/prometheus/prometheus.yml:ro

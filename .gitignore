@@ -1,0 +1,31 @@
+# Backend
+panaderia-backend/target/
+panaderia-backend/logs/
+panaderia-backend/tmp/
+panaderia-backend/output/
+*.class
+*.log
+
+# Frontend
+panaderia-frontend/node_modules/
+panaderia-frontend/dist/
+panaderia-frontend/.angular/
+panaderia-frontend/.codex-test-tmp/
+panaderia-frontend/.tmp-tests/
+panaderia-frontend/coverage/
+
+# Editores
+.vscode/
+.idea/
+
+# Variables privadas
+.env
+.env.*
+!.env.example
+
+# Archivos temporales o duplicados
+*.tmp
+*.bak
+*.zip
+Thumbs.db
+.DS_Store

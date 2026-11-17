@@ -1,0 +1,68 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">{{ esEdicion ? 'Editar categoría' : 'Nueva categoría' }}</h2>
+      <p class="pagina__descripcion">
+        {{
+          esEdicion
+            ? 'Modifica el nombre o la descripción de la categoría seleccionada.'
+            : 'Registra una nueva categoría para clasificar los productos.'
+        }}
+      </p>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  <form class="formulario-tarjeta" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    @if (loading()) {
+      <div class="formulario-cargando">
+        <mat-spinner diameter="36" />
+        <p>Cargando categoría...</p>
+      </div>
+    } @else {
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Nombre</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="nombre"
+          maxlength="80"
+          autocomplete="off"
+          placeholder="Ej. Panes"
+        />
+        @if (form.controls.nombre.touched && form.controls.nombre.hasError('required')) {
+          <mat-error>El nombre es obligatorio</mat-error>
+        }
+        @if (form.controls.nombre.touched && form.controls.nombre.hasError('maxlength')) {
+          <mat-error>Máximo 80 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Descripción</mat-label>
+        <textarea
+          matInput
+          formControlName="descripcion"
+          maxlength="200"
+          rows="3"
+          placeholder="Descripción opcional"
+        ></textarea>
+        @if (form.controls.descripcion.touched && form.controls.descripcion.hasError('maxlength')) {
+          <mat-error>Máximo 200 caracteres</mat-error>
+        }
+      </mat-form-field>
+    }
+
+    <div class="formulario-acciones">
+      <a mat-stroked-button routerLink="/administracion/categorias">Cancelar</a>
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading() || saving()">
+        {{ saving() ? 'Guardando...' : esEdicion ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+</section>

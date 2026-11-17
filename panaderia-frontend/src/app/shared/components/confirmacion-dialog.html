@@ -1,0 +1,26 @@
+<section class="confirmacion" role="alertdialog" aria-labelledby="confirmacion-titulo">
+  <div class="confirmacion__icono" [class.confirmacion__icono--peligro]="data.peligro">
+    <mat-icon>{{ data.peligro ? 'warning_amber' : 'help_outline' }}</mat-icon>
+  </div>
+  <h2 id="confirmacion-titulo" mat-dialog-title>{{ data.titulo }}</h2>
+  <mat-dialog-content>
+    <p class="confirmacion__mensaje">{{ data.mensaje }}</p>
+    @if (data.detalle) {
+      <div class="confirmacion__detalle">{{ data.detalle }}</div>
+    }
+  </mat-dialog-content>
+  <mat-dialog-actions align="center">
+    <button mat-stroked-button type="button" [mat-dialog-close]="false">
+      {{ data.textoCancelar ?? 'Cancelar' }}
+    </button>
+    <button
+      mat-flat-button
+      type="button"
+      [color]="data.peligro ? 'warn' : 'primary'"
+      [mat-dialog-close]="true"
+      cdkFocusInitial
+    >
+      {{ data.textoConfirmar ?? 'Confirmar' }}
+    </button>
+  </mat-dialog-actions>
+</section>

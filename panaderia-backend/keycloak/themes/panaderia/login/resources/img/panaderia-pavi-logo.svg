@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 112" role="img" aria-labelledby="logo-title logo-description">
+  <title id="logo-title">Panadería Pavi</title>
+  <desc id="logo-description">Símbolo de pan y trigo de Panadería Pavi</desc>
+  <g fill="none" stroke="#d2a20c" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke-width="6" d="M20 78c0-28 20-50 46-50s46 22 46 50c0 8-7 14-15 14H35c-8 0-15-6-15-14Z"/>
+    <path stroke-width="5" d="M46 52c8 7 12 17 12 29M67 43c8 10 11 23 9 37M88 51c-7 8-10 18-10 29"/>
+    <path stroke-width="4" d="M14 92h104"/>
+  </g>
+  <g fill="#fffaf0">
+    <text x="136" y="55" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Panadería Pavi</text>
+    <text x="138" y="82" font-family="Arial, Helvetica, sans-serif" font-size="17" letter-spacing="1">SISTEMA DE GESTIÓN INTEGRAL</text>
+  </g>
+</svg>

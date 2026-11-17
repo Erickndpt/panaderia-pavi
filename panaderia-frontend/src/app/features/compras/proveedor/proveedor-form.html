@@ -1,0 +1,112 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">{{ esEdicion ? 'Editar proveedor' : 'Nuevo proveedor' }}</h2>
+      <p class="pagina__descripcion">
+        {{
+          esEdicion
+            ? 'Modifica los datos de contacto o el estado del proveedor seleccionado.'
+            : 'Registra un nuevo proveedor con su RUC y datos de contacto.'
+        }}
+      </p>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  <form class="formulario-tarjeta" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    @if (loading()) {
+      <div class="formulario-cargando">
+        <mat-spinner diameter="36" />
+        <p>Cargando proveedor...</p>
+      </div>
+    } @else {
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>RUC</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="ruc"
+          maxlength="11"
+          inputmode="numeric"
+          autocomplete="off"
+          placeholder="11 dígitos"
+        />
+        @if (form.controls.ruc.touched && form.controls.ruc.hasError('required')) {
+          <mat-error>El RUC es obligatorio</mat-error>
+        }
+        @if (form.controls.ruc.touched && form.controls.ruc.hasError('pattern')) {
+          <mat-error>El RUC debe contener exactamente 11 dígitos</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Razón social</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="razonSocial"
+          maxlength="120"
+          autocomplete="off"
+          placeholder="Ej. Distribuidora La Espiga S.A.C."
+        />
+        @if (form.controls.razonSocial.touched && form.controls.razonSocial.hasError('required')) {
+          <mat-error>La razón social es obligatoria</mat-error>
+        }
+        @if (form.controls.razonSocial.touched && form.controls.razonSocial.hasError('maxlength')) {
+          <mat-error>Máximo 120 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="formulario-rejilla">
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>Teléfono</mat-label>
+          <input
+            matInput
+            type="tel"
+            formControlName="telefono"
+            maxlength="20"
+            autocomplete="off"
+            placeholder="Opcional"
+          />
+          @if (form.controls.telefono.touched && form.controls.telefono.hasError('maxlength')) {
+            <mat-error>Máximo 20 caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            maxlength="120"
+            autocomplete="off"
+            placeholder="Opcional"
+          />
+          @if (form.controls.email.touched && form.controls.email.hasError('email')) {
+            <mat-error>Ingrese un correo válido</mat-error>
+          }
+          @if (form.controls.email.touched && form.controls.email.hasError('maxlength')) {
+            <mat-error>Máximo 120 caracteres</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-slide-toggle color="primary" formControlName="activo">
+        Proveedor activo
+      </mat-slide-toggle>
+    }
+
+    <div class="formulario-acciones">
+      <a mat-stroked-button routerLink="/compras/proveedores">Cancelar</a>
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading() || saving()">
+        {{ saving() ? 'Guardando...' : esEdicion ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+</section>

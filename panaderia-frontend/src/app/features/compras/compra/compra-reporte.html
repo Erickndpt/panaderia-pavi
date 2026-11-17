@@ -1,0 +1,190 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">Reporte de compras</h2>
+      <p class="pagina__descripcion">
+        Consulta todas las compras registradas, filtra por estado y rango de fechas, revisa
+        el detalle de cada compra y anula las que correspondan.
+      </p>
+    </div>
+    <div class="pagina__acciones">
+      <a mat-flat-button color="primary" routerLink="/compras/nueva">
+        <mat-icon class="mat-icono-fila">add_business</mat-icon>
+        Nueva compra
+      </a>
+      <button mat-stroked-button type="button" (click)="cargar()" [disabled]="loading()">
+        <mat-icon class="mat-icono-fila">refresh</mat-icon>
+        Recargar
+      </button>
+    </div>
+  </header>
+
+  @if (exito(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" tipo="exito" />
+    </div>
+  }
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  <div class="filtros">
+    <mat-form-field appearance="outline" class="filtros__campo--angosto">
+      <mat-label>Estado</mat-label>
+      <mat-select [value]="filtroEstado()" (selectionChange)="actualizarFiltroEstado($event.value)">
+        <mat-option value="TODAS">Todas</mat-option>
+        <mat-option value="REGISTRADA">Registradas</mat-option>
+        <mat-option value="ANULADA">Anuladas</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtros__campo--angosto">
+      <mat-label>Desde</mat-label>
+      <input
+        matInput
+        type="date"
+        [value]="borradorDesde()"
+        (input)="actualizarBorradorDesde($any($event.target).value)"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtros__campo--angosto">
+      <mat-label>Hasta</mat-label>
+      <input
+        matInput
+        type="date"
+        [value]="borradorHasta()"
+        (input)="actualizarBorradorHasta($any($event.target).value)"
+      />
+    </mat-form-field>
+
+    <div class="filtros__acciones">
+      <button mat-flat-button color="primary" type="button" (click)="aplicarFechas()">Aplicar</button>
+      <button mat-stroked-button type="button" (click)="limpiarFechas()">Limpiar</button>
+    </div>
+  </div>
+
+  @if (errorFechas(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="pagina__cargando">
+      <mat-spinner diameter="36" />
+      <p>Cargando compras...</p>
+    </div>
+  } @else {
+    <div class="reporte-indicadores">
+      <div class="indicador">
+        <span class="indicador__etiqueta">Compras visibles</span>
+        <span class="indicador__valor">{{ resumen().cantidad }}</span>
+      </div>
+      <div class="indicador">
+        <span class="indicador__etiqueta">Vigentes</span>
+        <span class="indicador__valor">{{ resumen().registradas }}</span>
+      </div>
+      <div class="indicador">
+        <span class="indicador__etiqueta">Monto vigente</span>
+        <span class="indicador__valor indicador__valor--moneda">{{
+          formatearMoneda(resumen().montoVigente)
+        }}</span>
+      </div>
+      <div class="indicador">
+        <span class="indicador__etiqueta">Promedio por compra</span>
+        <span class="indicador__valor indicador__valor--moneda">{{
+          formatearMoneda(resumen().promedio)
+        }}</span>
+      </div>
+    </div>
+
+    @if (compras().length === 0) {
+      <p class="pagina__estado">No hay compras registradas</p>
+    } @else if (comprasFiltradas().length === 0) {
+      <p class="pagina__estado">No hay compras que coincidan con los filtros aplicados</p>
+    } @else {
+      <div class="reporte-lista">
+        @for (compra of comprasFiltradas(); track compra.id) {
+          <article class="compra">
+            <header class="compra__cabecera">
+              <div class="compra__identidad">
+                <span class="compra__id">Compra #{{ compra.id }}</span>
+                <span class="compra__fecha">{{ compra.fecha | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="compra__proveedor">
+                <span class="compra__razon">{{ compra.proveedor.razonSocial }}</span>
+                <span class="compra__ruc">RUC {{ rucDe(compra.proveedor.id) }}</span>
+              </div>
+              <div class="compra__resumen">
+                <span
+                  class="chip-estado"
+                  [class.chip-estado--activo]="compra.estado === 'REGISTRADA'"
+                  [class.chip-estado--inactivo]="compra.estado === 'ANULADA'"
+                >
+                  {{ compra.estado === 'REGISTRADA' ? 'Registrada' : 'Anulada' }}
+                </span>
+                <span class="compra__total">{{ formatearMoneda(monto(compra.total)) }}</span>
+              </div>
+              @if (compra.estado === 'REGISTRADA') {
+                <button
+                  mat-stroked-button
+                  color="warn"
+                  type="button"
+                  [disabled]="anulandoId() !== null"
+                  (click)="anular(compra)"
+                >
+                  <mat-icon class="mat-icono-fila">block</mat-icon>
+                  {{ anulandoId() === compra.id ? 'Anulando...' : 'Anular' }}
+                </button>
+              }
+            </header>
+
+            <div class="tabla-contenedor">
+              <table mat-table class="tabla-material" [dataSource]="compra.detalles">
+                <ng-container matColumnDef="insumo">
+                  <th mat-header-cell *matHeaderCellDef>Insumo</th>
+                  <td mat-cell *matCellDef="let detalle" class="celda-nombre">
+                    {{ detalle.nombreInsumo }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="unidad">
+                  <th mat-header-cell *matHeaderCellDef>Unidad</th>
+                  <td mat-cell *matCellDef="let detalle">{{ detalle.unidadMedida }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="cantidad">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-numero">Cantidad</th>
+                  <td mat-cell *matCellDef="let detalle" class="mat-column-numero celda-numerica">
+                    {{ detalle.cantidad | number: '1.0-3' }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="precioUnitario">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-numero">P. unitario</th>
+                  <td mat-cell *matCellDef="let detalle" class="mat-column-numero celda-numerica">
+                    {{ formatearMoneda(detalle.precioUnitario) }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="subtotal">
+                  <th mat-header-cell *matHeaderCellDef class="mat-column-numero">Subtotal</th>
+                  <td mat-cell *matCellDef="let detalle" class="mat-column-numero celda-numerica">
+                    {{ formatearMoneda(detalle.subtotal) }}
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="columnasDetalle"></tr>
+                <tr mat-row *matRowDef="let fila; columns: columnasDetalle"></tr>
+              </table>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  }
+</section>

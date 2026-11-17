@@ -1,0 +1,127 @@
+.filtros__acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.4rem;
+}
+
+.reporte-indicadores {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  background-color: #fffaf0;
+  border: 1px solid #e4d5bb;
+  border-top: 4px solid #c9a227;
+  border-radius: 10px;
+}
+
+.indicador__etiqueta {
+  color: #8a7458;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.indicador__valor {
+  color: #3b2416;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador__valor--moneda {
+  font-size: 1.2rem;
+}
+
+.reporte-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.compra {
+  padding: 1rem 1.15rem 1.15rem;
+  background-color: #fffaf0;
+  border: 1px solid #e4d5bb;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgb(59 36 22 / 8%);
+}
+
+.compra__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px dashed #e4d5bb;
+}
+
+.compra__identidad {
+  display: flex;
+  flex-direction: column;
+}
+
+.compra__id {
+  color: #3b2416;
+  font-weight: 700;
+}
+
+.compra__fecha {
+  color: #8a7458;
+  font-size: 0.85rem;
+}
+
+.compra__proveedor {
+  display: flex;
+  flex-direction: column;
+}
+
+.compra__razon {
+  color: #3b2416;
+  font-weight: 600;
+}
+
+.compra__ruc {
+  color: #8a7458;
+  font-size: 0.85rem;
+}
+
+.compra__resumen {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.compra__total {
+  color: #3b2416;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (width <= 860px) {
+  .reporte-indicadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 640px) {
+  .reporte-indicadores {
+    grid-template-columns: 1fr;
+  }
+
+  .compra__cabecera {
+    align-items: flex-start;
+  }
+}

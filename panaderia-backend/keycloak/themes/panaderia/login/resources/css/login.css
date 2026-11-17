@@ -1,0 +1,287 @@
+:root {
+  --pavi-brown-950: #2a150c;
+  --pavi-brown-900: #3b2114;
+  --pavi-brown-800: #57331f;
+  --pavi-cream-100: #fffaf0;
+  --pavi-cream-200: #f7ecd7;
+  --pavi-gold-500: #d2a20c;
+  --pavi-gold-600: #b88900;
+  --pavi-blue-600: #0868c4;
+  --pavi-blue-700: #0757a3;
+  --pavi-danger-600: #b42318;
+  --pavi-shadow: 0 24px 64px rgb(20 10 5 / 34%);
+  --pavi-focus: 0 0 0 3px rgb(210 162 12 / 38%);
+}
+
+/* This theme only affects login pages of realms that explicitly select it. */
+html,
+body {
+  min-height: 100%;
+}
+
+body,
+.login-pf body,
+.pf-v5-c-login,
+.pf-v5-c-background-image {
+  color: var(--pavi-brown-950);
+  background:
+    radial-gradient(circle at 14% 18%, rgb(210 162 12 / 20%) 0 2px, transparent 3px),
+    radial-gradient(circle at 84% 76%, rgb(255 250 240 / 12%) 0 2px, transparent 3px),
+    linear-gradient(135deg, rgb(42 21 12 / 97%), rgb(87 51 31 / 94%));
+  background-color: var(--pavi-brown-900);
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.32;
+  background-image:
+    repeating-linear-gradient(62deg, transparent 0 42px, rgb(255 250 240 / 4%) 43px 44px),
+    repeating-linear-gradient(118deg, transparent 0 58px, rgb(210 162 12 / 5%) 59px 60px);
+}
+
+.pf-v5-c-login,
+.pf-v5-c-login__container,
+.login-pf-page {
+  position: relative;
+  z-index: 1;
+}
+
+.pf-v5-c-login__container,
+.login-pf-page {
+  width: min(100% - 2rem, 31rem);
+  margin-inline: auto;
+}
+
+#kc-header {
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+#kc-header-wrapper {
+  width: min(100%, 27.5rem);
+  min-height: 7rem;
+  margin-inline: auto;
+  overflow: hidden;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  text-indent: -9999px;
+  background: url("../img/panaderia-pavi-logo.svg") center / contain no-repeat;
+}
+
+.pf-v5-c-login__main,
+.card-pf,
+#kc-content {
+  color: var(--pavi-brown-950);
+  background: rgb(255 250 240 / 98%);
+  border: 1px solid rgb(210 162 12 / 42%);
+  border-radius: 1rem;
+  box-shadow: var(--pavi-shadow);
+}
+
+.pf-v5-c-login__main,
+.card-pf {
+  overflow: hidden;
+}
+
+.pf-v5-c-login__main::before,
+.card-pf::before {
+  display: block;
+  width: 100%;
+  height: 0.35rem;
+  content: "";
+  background: linear-gradient(90deg, var(--pavi-gold-600), var(--pavi-gold-500), var(--pavi-brown-800));
+}
+
+.pf-v5-c-login__main-header,
+.pf-v5-c-login__main-body,
+.pf-v5-c-login__main-footer,
+.card-pf {
+  padding-inline: clamp(1.25rem, 5vw, 2.5rem);
+}
+
+#kc-page-title {
+  margin-block: 0 1.8rem;
+  color: var(--pavi-brown-950);
+  font-size: clamp(1.65rem, 4vw, 2rem);
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: left;
+}
+
+#kc-page-title::before {
+  display: block;
+  width: 10.75rem;
+  height: 10.75rem;
+  margin: -0.35rem auto 1.35rem;
+  content: "";
+  background: url("../img/panaderia-pavi-emblema.png") center / contain no-repeat;
+  filter: drop-shadow(0 10px 14px rgb(42 21 12 / 18%));
+}
+
+#kc-page-title::after {
+  display: block;
+  margin-top: 0.65rem;
+  color: #72523e;
+  content: "Ingresa con tu cuenta asignada para continuar";
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+label,
+.pf-v5-c-form__label-text,
+.control-label {
+  color: var(--pavi-brown-900);
+  font-weight: 650;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+.pf-v5-c-form-control,
+.form-control {
+  min-height: 2.85rem;
+  color: var(--pavi-brown-950);
+  background-color: #fff;
+  border-color: #9a7b67;
+  border-radius: 0.55rem;
+}
+
+#kc-form-login input[type="text"],
+#kc-form-login input[type="email"],
+#kc-form-login input[type="password"],
+#kc-form-login .pf-v5-c-form-control {
+  color: var(--pavi-brown-950) !important;
+  background-color: #fff !important;
+}
+
+#kc-form-login input::placeholder {
+  color: #816858;
+  opacity: 1;
+}
+
+#kc-form-login input:-webkit-autofill,
+#kc-form-login input:-webkit-autofill:hover,
+#kc-form-login input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--pavi-brown-950);
+  box-shadow: 0 0 0 1000px #fff inset;
+  caret-color: var(--pavi-brown-950);
+}
+
+input:hover,
+.pf-v5-c-form-control:hover,
+.form-control:hover {
+  border-color: var(--pavi-gold-600);
+}
+
+input:focus,
+button:focus-visible,
+a:focus-visible,
+.pf-v5-c-form-control:focus-within,
+.form-control:focus {
+  outline: 2px solid transparent;
+  border-color: var(--pavi-gold-600);
+  box-shadow: var(--pavi-focus);
+}
+
+.pf-v5-c-button.pf-m-primary,
+#kc-login,
+input[type="submit"] {
+  min-height: 2.9rem;
+  color: #fff;
+  font-weight: 700;
+  background: var(--pavi-blue-600);
+  border: 1px solid var(--pavi-blue-600);
+  border-radius: 0.6rem;
+  box-shadow: 0 8px 18px rgb(8 104 196 / 20%);
+}
+
+.pf-v5-c-button.pf-m-primary:hover,
+#kc-login:hover,
+input[type="submit"]:hover {
+  background: var(--pavi-blue-700);
+  border-color: var(--pavi-blue-700);
+}
+
+.pf-v5-c-button:disabled,
+#kc-login:disabled,
+input[type="submit"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  box-shadow: none;
+}
+
+a {
+  color: var(--pavi-blue-700);
+  font-weight: 600;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--pavi-brown-800);
+}
+
+.pf-v5-c-alert.pf-m-danger,
+.alert-error,
+.kc-feedback-text {
+  color: #7a1812;
+  background: #fff1ef;
+  border-color: #e5a9a3;
+  border-radius: 0.65rem;
+}
+
+.pf-v5-c-helper-text__item.pf-m-error,
+.has-error,
+[aria-invalid="true"] {
+  color: var(--pavi-danger-600);
+}
+
+[aria-invalid="true"] {
+  border-color: var(--pavi-danger-600);
+}
+
+#kc-info-wrapper,
+.pf-v5-c-login__main-footer-band {
+  color: #694b39;
+  background: var(--pavi-cream-200);
+}
+
+@media (max-width: 640px) {
+  .pf-v5-c-login__container,
+  .login-pf-page {
+    width: min(100% - 1rem, 31rem);
+  }
+
+  #kc-header-wrapper {
+    min-height: 5.5rem;
+  }
+
+  #kc-page-title::before {
+    width: 8.75rem;
+    height: 8.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .pf-v5-c-login__main-header,
+  .pf-v5-c-login__main-body,
+  .pf-v5-c-login__main-footer,
+  .card-pf {
+    padding-inline: 1.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

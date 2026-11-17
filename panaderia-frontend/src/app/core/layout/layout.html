@@ -1,0 +1,130 @@
+<mat-sidenav-container class="layout">
+  <mat-sidenav
+    class="menu-lateral"
+    [mode]="modo()"
+    [opened]="abierto()"
+    (closedStart)="abierto.set(false)"
+  >
+    <nav class="menu-lateral__nav" aria-label="Menú principal">
+      <p class="menu-lateral__seccion">Navegación</p>
+      <mat-nav-list class="menu-lateral__lista">
+        <a
+          mat-list-item
+          class="menu-lateral__enlace"
+          routerLink="/"
+          routerLinkActive="menu-lateral__enlace--activo"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <mat-icon matListItemIcon>home</mat-icon>
+          <span matListItemTitle>Inicio</span>
+        </a>
+      </mat-nav-list>
+
+      @if (autenticado()) {
+        @for (grupo of gruposVisibles(); track grupo.nombre) {
+          <button
+            type="button"
+            mat-list-item
+            class="menu-lateral__grupo"
+            [class.menu-lateral__grupo--abierto]="estaExpandido(grupo.nombre)"
+            [attr.aria-expanded]="estaExpandido(grupo.nombre)"
+            (click)="alternarGrupo(grupo.nombre)"
+          >
+            <mat-icon matListItemIcon>{{ grupo.icono }}</mat-icon>
+            <span matListItemTitle>{{ grupo.nombre }}</span>
+            <mat-icon matListItemMeta aria-hidden="true">
+              {{ estaExpandido(grupo.nombre) ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+
+          @if (estaExpandido(grupo.nombre)) {
+            <mat-nav-list class="menu-lateral__subnav" [attr.aria-label]="grupo.nombre">
+              @for (item of grupo.items; track item.nombre) {
+                @if (item.pendiente) {
+                  <div
+                    mat-list-item
+                    class="menu-lateral__enlace menu-lateral__enlace--inactivo"
+                    aria-disabled="true"
+                  >
+                    <mat-icon matListItemIcon aria-hidden="true">{{ item.icono }}</mat-icon>
+                    <span matListItemTitle>
+                      {{ item.nombre }}
+                      <span class="chip-pendiente">Pendiente</span>
+                    </span>
+                  </div>
+                } @else {
+                  <a
+                    mat-list-item
+                    class="menu-lateral__enlace"
+                    [routerLink]="item.ruta"
+                    routerLinkActive="menu-lateral__enlace--activo"
+                  >
+                    <mat-icon matListItemIcon aria-hidden="true">{{ item.icono }}</mat-icon>
+                    <span matListItemTitle>{{ item.nombre }}</span>
+                  </a>
+                }
+              }
+            </mat-nav-list>
+          }
+        }
+      } @else {
+        <p class="menu-lateral__aviso">Inicia sesión para acceder a los módulos.</p>
+      }
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="cuerpo">
+    <mat-toolbar class="encabezado">
+      <button
+        type="button"
+        mat-icon-button
+        class="encabezado__menu"
+        aria-label="Mostrar u ocultar el menú"
+        (click)="alternarPanel()"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+      <div class="encabezado__marca">
+        <mat-icon class="encabezado__logo" aria-hidden="true">bakery_dining</mat-icon>
+        <div class="encabezado__titulos">
+          <span class="encabezado__titulo">Panadería Pavi</span>
+          <span class="encabezado__subtitulo">Sistema de gestión integral</span>
+        </div>
+      </div>
+
+      <span class="encabezado__espacio"></span>
+
+      @if (autenticado()) {
+        <span class="encabezado__usuario">
+          <mat-icon aria-hidden="true">account_circle</mat-icon>
+          <span class="encabezado__nombre" [attr.title]="usuario()">{{ usuario() }}</span>
+        </span>
+        <button
+          mat-stroked-button
+          type="button"
+          class="encabezado__sesion"
+          aria-label="Cerrar sesión"
+          (click)="cerrarSesion()"
+        >
+          <mat-icon>logout</mat-icon>
+          <span class="encabezado__sesion-texto">Cerrar sesión</span>
+        </button>
+      } @else {
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="encabezado__sesion"
+          (click)="iniciarSesion()"
+        >
+          <mat-icon>login</mat-icon>
+          <span class="encabezado__sesion-texto">Iniciar sesión</span>
+        </button>
+      }
+    </mat-toolbar>
+
+    <main class="contenido">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

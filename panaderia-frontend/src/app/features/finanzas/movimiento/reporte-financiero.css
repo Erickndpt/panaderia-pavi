@@ -1,0 +1,86 @@
+:host {
+  display: block;
+}
+
+.reporte-nota {
+  margin: 0 0 1rem;
+  color: #8a7458;
+  font-size: 0.9rem;
+}
+
+.reporte-indicadores {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.15rem;
+  background-color: #fffaf0;
+  border: 1px solid #e4d5bb;
+  border-top: 4px solid #c9a227;
+  border-radius: 10px;
+}
+
+.indicador--saldo {
+  grid-column: span 2;
+}
+
+.indicador__etiqueta {
+  color: #8a7458;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.indicador__valor {
+  color: #3b2416;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador__valor--moneda {
+  font-size: 1.25rem;
+}
+
+.indicador__valor--positivo {
+  color: #2f6b3f;
+}
+
+.indicador__valor--negativo {
+  color: #8c2f27;
+}
+
+.indicador__valor--cero {
+  color: #8a7458;
+}
+
+.indicador__detalle {
+  color: #8a7458;
+  font-size: 0.82rem;
+}
+
+@media (width <= 860px) {
+  .reporte-indicadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .indicador--saldo {
+    grid-column: span 2;
+  }
+}
+
+@media (width <= 640px) {
+  .reporte-indicadores {
+    grid-template-columns: 1fr;
+  }
+
+  .indicador--saldo {
+    grid-column: span 1;
+  }
+}

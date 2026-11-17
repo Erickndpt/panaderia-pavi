@@ -1,0 +1,109 @@
+<section class="pagina">
+  <header class="pagina__cabecera">
+    <div class="pagina__cabecera-texto">
+      <h2 class="pagina__titulo">{{ esEdicion ? 'Editar insumo' : 'Nuevo insumo' }}</h2>
+      <p class="pagina__descripcion">
+        {{
+          esEdicion
+            ? 'Modifica los datos de la materia prima seleccionada.'
+            : 'Registra una nueva materia prima en el inventario.'
+        }}
+      </p>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="pagina__mensajes">
+      <app-alerta [mensaje]="mensaje" />
+    </div>
+  }
+
+  <form class="formulario-tarjeta" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    @if (loading()) {
+      <div class="formulario-cargando">
+        <mat-spinner diameter="36" />
+        <p>Cargando insumo...</p>
+      </div>
+    } @else {
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Nombre</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="nombre"
+          maxlength="80"
+          autocomplete="off"
+          placeholder="Harina de trigo"
+        />
+        @if (form.controls.nombre.touched && form.controls.nombre.hasError('required')) {
+          <mat-error>Campo obligatorio</mat-error>
+        }
+        @if (form.controls.nombre.touched && form.controls.nombre.hasError('maxlength')) {
+          <mat-error>Máximo 80 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="formulario-campo">
+        <mat-label>Unidad de medida</mat-label>
+        <mat-select formControlName="unidadMedida">
+          @for (unidad of unidadesMedida; track unidad) {
+            <mat-option [value]="unidad">{{ unidad }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.unidadMedida.touched && form.controls.unidadMedida.hasError('required')) {
+          <mat-error>Campo obligatorio</mat-error>
+        }
+        @if (
+          form.controls.unidadMedida.touched && form.controls.unidadMedida.hasError('maxlength')
+        ) {
+          <mat-error>Máximo 20 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="formulario-rejilla">
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>Stock actual</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="stockActual"
+            min="0"
+            step="0.001"
+            inputmode="decimal"
+          />
+          @if (form.controls.stockActual.touched && form.controls.stockActual.hasError('required')) {
+            <mat-error>Campo obligatorio</mat-error>
+          }
+          @if (form.controls.stockActual.touched && form.controls.stockActual.hasError('min')) {
+            <mat-error>El valor no puede ser negativo</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="formulario-campo">
+          <mat-label>Stock mínimo</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="stockMinimo"
+            min="0"
+            step="0.001"
+            inputmode="decimal"
+          />
+          @if (form.controls.stockMinimo.touched && form.controls.stockMinimo.hasError('required')) {
+            <mat-error>Campo obligatorio</mat-error>
+          }
+          @if (form.controls.stockMinimo.touched && form.controls.stockMinimo.hasError('min')) {
+            <mat-error>El valor no puede ser negativo</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    }
+
+    <div class="formulario-acciones">
+      <a mat-stroked-button routerLink="/inventario/insumos">Cancelar</a>
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading() || saving()">
+        {{ saving() ? 'Guardando...' : esEdicion ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+</section>

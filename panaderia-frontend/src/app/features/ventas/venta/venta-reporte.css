@@ -1,0 +1,184 @@
+.filtros__acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.4rem;
+}
+
+.reporte-indicadores {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  background-color: #fffaf0;
+  border: 1px solid #e4d5bb;
+  border-top: 4px solid #c9a227;
+  border-radius: 10px;
+}
+
+.indicador__etiqueta {
+  color: #8a7458;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.indicador__valor {
+  color: #3b2416;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador__valor--moneda {
+  font-size: 1.2rem;
+}
+
+.reporte-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.venta {
+  padding: 1rem 1.15rem 1.15rem;
+  background-color: #fffaf0;
+  border: 1px solid #e4d5bb;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgb(59 36 22 / 8%);
+}
+
+.venta__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px dashed #e4d5bb;
+}
+
+.venta__identidad {
+  display: flex;
+  flex-direction: column;
+}
+
+.venta__id {
+  color: #3b2416;
+  font-weight: 700;
+}
+
+.venta__fecha {
+  color: #8a7458;
+  font-size: 0.85rem;
+}
+
+.venta__cliente {
+  display: flex;
+  flex-direction: column;
+}
+
+.venta__nombre {
+  color: #3b2416;
+  font-weight: 600;
+}
+
+.venta__documento {
+  color: #8a7458;
+  font-size: 0.85rem;
+}
+
+.venta__vendedor {
+  display: flex;
+  flex-direction: column;
+}
+
+.venta__vendedor-etiqueta {
+  color: #8a7458;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.venta__vendedor-nombre {
+  color: #3b2416;
+  font-weight: 600;
+}
+
+.venta__tipo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.chip-tipo {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background-color: #eee3d0;
+  color: #6f4e37;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.venta__pais {
+  color: #8a7458;
+  font-size: 0.85rem;
+}
+
+.venta__resumen {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.venta__total {
+  color: #3b2416;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.venta__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.opcion-titulo {
+  font-weight: 600;
+}
+
+.opcion-detalle {
+  margin-left: 0.5rem;
+  color: #8a7458;
+  font-size: 0.85rem;
+}
+
+@media (width <= 860px) {
+  .reporte-indicadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 640px) {
+  .reporte-indicadores {
+    grid-template-columns: 1fr;
+  }
+
+  .venta__cabecera {
+    align-items: flex-start;
+  }
+}

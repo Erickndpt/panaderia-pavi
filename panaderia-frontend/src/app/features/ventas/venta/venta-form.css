@@ -1,0 +1,96 @@
+.venta-tarjeta {
+  max-width: 900px;
+}
+
+.venta-subtitulo {
+  margin: 1.5rem 0 0.75rem;
+  color: #6f4e37;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.detalle-lineas {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.linea {
+  padding: 1rem;
+  background-color: #fffaf0;
+  border: 1px solid #e4d5bb;
+  border-radius: 10px;
+}
+
+.linea__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.linea__numero {
+  color: #a67c52;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.linea__subtotal {
+  margin: 0;
+  color: #6f4e37;
+  text-align: right;
+}
+
+.linea__advertencia {
+  display: flex;
+  align-items: center;
+  margin: 0 0 0.5rem;
+  color: #8c2f27;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.linea__reintentar {
+  margin: 0 0 0.5rem;
+}
+
+.venta-agregar {
+  margin-top: 1rem;
+}
+
+.venta-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+  padding: 0.9rem 1rem;
+  background-color: #f3e7cf;
+  border: 1px solid #e4d5bb;
+  border-radius: 10px;
+}
+
+.venta-total__etiqueta {
+  color: #6f4e37;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.venta-total__valor {
+  color: #3b2416;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.opcion-titulo {
+  font-weight: 600;
+}
+
+.opcion-detalle {
+  margin-left: 0.5rem;
+  color: #8a7458;
+  font-size: 0.85rem;
+}
