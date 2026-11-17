@@ -1,0 +1,98 @@
+{
+  "realm": "panaderia",
+  "enabled": true,
+  "displayName": "Panadería Pavi",
+  "loginTheme": "panaderia",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "roles": {
+    "realm": [
+      { "name": "VENDEDOR", "description": "Registra ventas y clientes" },
+      { "name": "SUPERVISOR", "description": "Supervisa inventario, compras y producción" },
+      { "name": "ADMIN", "description": "Administra catálogos y operaciones" },
+      { "name": "GERENTE_GENERAL", "description": "Acceso general al sistema" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "panaderia-frontend",
+      "name": "Panadería Pavi Frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "gerente1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Gerente",
+      "lastName": "General",
+      "email": "gerente1@panaderiapavi.pe",
+      "credentials": [
+        { "type": "password", "value": "Pavi2026*", "temporary": false }
+      ],
+      "realmRoles": ["GERENTE_GENERAL"]
+    },
+    {
+      "username": "admin1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Administrador",
+      "lastName": "Pavi",
+      "email": "admin1@panaderiapavi.pe",
+      "credentials": [
+        { "type": "password", "value": "Pavi2026*", "temporary": false }
+      ],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "supervisor1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Supervisor",
+      "lastName": "Pavi",
+      "email": "supervisor1@panaderiapavi.pe",
+      "credentials": [
+        { "type": "password", "value": "Pavi2026*", "temporary": false }
+      ],
+      "realmRoles": ["SUPERVISOR"]
+    },
+    {
+      "username": "vendedor1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Vendedor",
+      "lastName": "Pavi",
+      "email": "vendedor1@panaderiapavi.pe",
+      "credentials": [
+        { "type": "password", "value": "Pavi2026*", "temporary": false }
+      ],
+      "realmRoles": ["VENDEDOR"]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+target/
+logs/
+tmp/
+output/
+.git/
+.idea/
+.vscode/
+docs/
+database/
+*.log
+*.zip
